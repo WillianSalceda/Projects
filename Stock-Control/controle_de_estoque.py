@@ -6,8 +6,18 @@ This is a reST style.
 :returns: this is a description of what is returned
 :raises keyError: raises an exception
 """
+
+# IMPLEMENTAR QUE, CASO 'ESC' SEJA PRESSIONADO, VOLTAR AO MENU PRINCIPAL DE SELEÇÃO.
+# IMPLEMENTAR NO "DATA ENTREGA" QUE APÓS DIGITAR DOIS NÚMEROS ELE AUTOMATICAMENTE INSERE UMA BARRA
+
+from pynput.keyboard import Key, Controller
 from time import sleep
+from datetime import datetime
+
 import os
+
+
+keyboard = Controller()  # Não sei, o que sei é que na documentação de pynput devo fazer isto ;).
 
 
 colors = {
@@ -25,7 +35,15 @@ background = {
     'blue': '\033[44m'
 }
 
-produtos = list()
+produtos = [
+    [{'id': 1},
+    {'produto': 'Whiskas Sachê'}, 
+    {'código': 555000101}, 
+    {'quantidade': 113}, 
+    {'data de entrega': '07/12/18'}, 
+    {'data cadastro': datetime.now().replace(microsecond=0)},
+    {'nota fiscal': 753492563272}]
+    ]
 usuários = list()
 
 def linhas(cor, tipo, tamanho):
@@ -61,19 +79,22 @@ def carregamento_falso():
 
 
 def controle_de_estoque():
+
     while True:
+        os.system('cls')
 
         def painel_de_entrada(titulo_area):
             print('')
-            linhas("red", '~~', 50)
+            linhas("red", '~', 140)
 
             titulo_do_programa = 'OCG SISTEMAS - CONTROLE DE ESTOQUE'
-            print(f'{colors["red"]}{titulo_do_programa:^100}{colors["default"]}')
+            print(f'{colors["red"]}{titulo_do_programa:^140}{colors["default"]}')
+            
+            linhas("red", '~', 140)
 
-            linhas("red", '~~', 50)
+            titulo_da_area(f'{titulo_area:^140}')
+            linhas("white", '-', 140)
 
-            titulo_da_area(titulo_area)
-            linhas("white", '-', 100)
         painel_de_entrada('')
 
         def navegação():
@@ -85,14 +106,16 @@ def controle_de_estoque():
                 f'\n6 - LISTA DE USUÁRIOS'
                 f'\n7 - SAIR')
         navegação()
-        
+        print('')
+
         while True:
             seleção = str(input('Selecione uma opção: '))
             continuar = ''
 
             if seleção == '1':
                 os.system('cls')
-                
+                id_produto = 0
+
                 while True:
                     os.system('cls')
                     sleep(0.5)
@@ -100,16 +123,24 @@ def controle_de_estoque():
                     # APAGAR ESTA LINHA APÓS IMPLEMENTAÇÃO ↓
                     # INCLUIR DATA DE CADASTRO, ALÉM DA HORA E MINUTO
                     painel_de_entrada('CADASTRAR PRODUTOS')
+
+                    id_produto += 1
+
                     nome_produto = str(input(f'\n{"PRODUTO":.<16}: '))
                     código_produto = int(input(f'{"CÓDIGO":.<16}: '))
                     quantidade_produto = int(input(f'{"QUANTIDADE":.<16}: '))
                     data_entrega_produto = str(input(f'{"DATA DA ENTREGA":.<16}: '))
                     nota_fiscal_produto = int(input(f'{"NOTA FISCAL":.<16}: '))
 
-                    produtos.append([{'produto': nome_produto}, 
+                    data_cadastro = datetime.now().replace(microsecond=0)
+
+
+                    produtos.append([{'id': id_produto},
+                                     {'produto': nome_produto}, 
                                      {'código': código_produto}, 
                                      {'quantidade': quantidade_produto}, 
                                      {'data de entrega': data_entrega_produto}, 
+                                     {'data cadastro': data_cadastro},
                                      {'nota fiscal': nota_fiscal_produto}])
 
                     print(produtos)
@@ -146,17 +177,52 @@ def controle_de_estoque():
                 
 
             elif seleção == '2':
-                os.system('cls')
-                
-#                while True:
+
                 os.system('cls')
                 sleep(0.5)
 
                 painel_de_entrada('ESTOQUE')
+                print('')
 
+                print(f'{"ID":^6} {"PRODUTO":^40} {"CÓDIGO":^9} {"QTD":^16} {"DATA ENTREGA":^17} {"DATA CADASTRO":^27} {"NOTA FISCAL":^17}')
+                print('-' * 6, end='    '), print('-' * 32, end='    ')  # ID & PRODUTO
+                print('-' * 12, end='    '), print('-' * 8, end='    ')  # CÓDIGO & QTD
+                print('-' * 18, end='    '), print('-' * 21, end='    ')  # DATA ENTREGA & DATA CADASTRO
+                print('-' * 19, end='\n')  # NOTA FISCAL
+
+
+                for index in range(0, len(produtos)):
+                    print('')
+#                    print(f'{" ":<1}', end=' ')
+                    for categoria in range(0, 7):
+#                        print(f'{" ":<3}', end=' ')
+                        for chave, valor in produtos[index][categoria].items():
+                            if chave == 'id':
+                                print(f'{valor:^6}', end=' ')
+                            elif chave == 'produto':
+                                print(f'{valor:^40}', end=' ')
+                            elif chave == 'código':
+                                print(f'{valor:^9}', end=' ')
+                            elif chave == 'quantidade':
+                                print(f'{valor:^15}', end=' ')
+                            elif chave == 'data de entrega':
+                                print(f'{valor:^17}', end=' ')
+                            elif chave == 'data cadastro':
+                                print(' ' * 4, f'{valor}', end=' ')
+                            elif chave == 'nota fiscal':
+                                print(f'{valor:^27}', end=' ')
+                print('')
+
+                #while not keyboard.pressed(Key.esc):
+                while True:
+                    continuar = input('Pressione a tecla ESC para sair!: ').upper().strip()
+                    if continuar == 'N':
+                        break
+                break
 
             elif seleção == '3':
                 print('u')
+            
             elif seleção == '4':
                 print('u')
 
@@ -231,7 +297,6 @@ def controle_de_estoque():
                 os.system('cls')
                 break
                 
-
             elif seleção == '6':
                 print('u')
 
@@ -244,7 +309,7 @@ if __name__ == '__main__':
 
     os.system('cls')
     # Nome auto-explicativo. Utilizável para para dar um ar de maior complexidade, completo bullshit.
-    carregamento_falso()
+#    carregamento_falso()
     # Limpa a tela após a execução do carregamento falso acima, para facilitar a utilização.
     os.system('cls')
     # Chamada do programa principal
