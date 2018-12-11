@@ -10,15 +10,12 @@ This is a reST style.
 # IMPLEMENTAR QUE, CASO 'ESC' SEJA PRESSIONADO, VOLTAR AO MENU PRINCIPAL DE SELEÇÃO.
 # IMPLEMENTAR NO "DATA ENTREGA" QUE APÓS DIGITAR DOIS NÚMEROS ELE AUTOMATICAMENTE INSERE UMA BARRA
 
-from pynput.keyboard import Key, Controller
+
 from time import sleep
 from datetime import datetime
 
 import os
-
-
-keyboard = Controller()  # Não sei, o que sei é que na documentação de pynput devo fazer isto ;).
-
+import keyboard
 
 colors = {
     'default': '\033[m',
@@ -42,7 +39,15 @@ produtos = [
     {'quantidade': 113}, 
     {'data de entrega': '07/12/18'}, 
     {'data cadastro': datetime.now().replace(microsecond=0)},
-    {'nota fiscal': 753492563272}]
+    {'nota fiscal': 753492563272}],
+    
+    [{'id': 2},
+    {'produto': 'Pedigree Eq. Raças Pequenas'}, 
+    {'código': 5550006333}, 
+    {'quantidade': 12145}, 
+    {'data de entrega': '13/09/18'}, 
+    {'data cadastro': datetime.now().replace(microsecond=0)},
+    {'nota fiscal': 646437534634536}]
     ]
 usuários = list()
 
@@ -193,9 +198,7 @@ def controle_de_estoque():
 
                 for index in range(0, len(produtos)):
                     print('')
-#                    print(f'{" ":<1}', end=' ')
                     for categoria in range(0, 7):
-#                        print(f'{" ":<3}', end=' ')
                         for chave, valor in produtos[index][categoria].items():
                             if chave == 'id':
                                 print(f'{valor:^6}', end=' ')
@@ -213,15 +216,73 @@ def controle_de_estoque():
                                 print(f'{valor:^27}', end=' ')
                 print('')
 
-                #while not keyboard.pressed(Key.esc):
-                while True:
-                    continuar = input('Pressione a tecla ESC para sair!: ').upper().strip()
-                    if continuar == 'N':
-                        break
-                break
+                print(f'\n{colors["red"]}{"APERTE A TECLA <ESC> PARA SAIR!":^140}{colors["default"]}')
+                keyboard.wait('esc')
 
+                os.system('cls')
+                sleep(0.5)
+
+                break
+                
             elif seleção == '3':
-                print('u')
+
+                os.system('cls')
+                sleep(0.5)
+
+                painel_de_entrada('ESCLUIR UM PRODUTO')
+                print('')
+
+                código_produto_excluir = int(input(f'CÓDIGO: '))
+
+
+                print(f'\n{"ID":^6} {"PRODUTO":^40} {"CÓDIGO":^9} {"QTD":^16} {"DATA ENTREGA":^17} {"DATA CADASTRO":^27} {"NOTA FISCAL":^17}')
+                print('-' * 6, end='    '), print('-' * 32, end='    ')  # ID & PRODUTO
+                print('-' * 12, end='    '), print('-' * 8, end='    ')  # CÓDIGO & QTD
+                print('-' * 18, end='    '), print('-' * 21, end='    ')  # DATA ENTREGA & DATA CADASTRO
+                print('-' * 19, end='\n')  # NOTA FISCAL
+
+                print(f'{colors["green"]}')
+                for index in range(0, len(produtos)):
+                    print('')
+                    for categoria in range(0, 7):
+                        for chave, valor in produtos[index][categoria].items():
+                            if chave == 'id':
+                                if valor == código_produto_excluir:
+                                    print(f'{valor:^6}', end=' ')
+                                for chave, valor in produtos[index][categoria].items():
+                                    if chave == 'id':
+                                        pass
+                                    if chave == 'produto':
+                                        print(f'{valor:^40}', end=' ')
+                                    if chave == 'código':
+                                        print(f'{valor:^9}', end=' ')
+                                    if chave == 'quantidade':
+                                        print(f'{valor:^15}', end=' ')
+                                    if chave == 'data de entrega':
+                                        print(f'{valor:^17}', end=' ')
+                                    if chave == 'data cadastro':
+                                        print(' ' * 4, f'{valor}', end=' ')
+                                    if chave == 'nota fiscal':
+                                        print(f'{valor:^27}', end=' ')
+                print('')
+
+
+
+                print(f'\n{colors["default"]}')
+
+                # ARRUMAR ↓
+                confirmação_excluir = str(input(f'{colors["red"]}DESEJA EXCLUIR ESTE PRODUTO? [S/N]: ').strip().upper())
+                if confirmação_excluir == 'S':
+                    for index in range(0, len(produtos)):
+                        print('')
+                        for categoria in range(0, 7):
+                            for chave, valor in produtos[index][categoria].items():
+                                if chave == 'id':
+                                    if valor == código_produto_excluir:
+                                        del produtos[index][categoria][chave]  # ARRUMAR
+                                        del produtos[index][categoria][chave]  # ARRUMAR
+                elif confirmação_excluir == 'N':
+                    break
             
             elif seleção == '4':
                 print('u')
@@ -239,27 +300,30 @@ def controle_de_estoque():
                     # APAGAR ESTA LINHA APÓS IMPLEMENTAÇÃO ↓
                     # INCLUIR DATA DE CADASTRO, ALÉM DA HORA E MINUTO
                     painel_de_entrada('CADASTRAR USUÁRIO')
-                    nome_usuario = str(input(f'\n{"NOME":.<16}: '))
-                    código_usuario = int(input(f'{"CÓDIGO":.<16}: '))
+
+                    nome_usuario = str(input(f'\n{"NOME":.<16}: ').strip())
+                    telefone_usuario = str(input(f'{"TELEFONE":.<16}: ').strip())
+                    código_usuario = int(input(f'{"CÓDIGO":.<16}: ').strip())
                     tipo_de_usuario = str(input('Físico (CPF) ou Jurídico (CNPJ)? [F/J]: ').upper().strip()[0])
 
                     if tipo_de_usuario == 'F':
-                        cpf_usuario =  str(input(f'{"CPF":.<16}: '))
+                        cpf_usuario =  str(input(f'{"CPF":.<16}: ').strip())
                     elif tipo_de_usuario == 'J':
-                        cnpj_usuario =  str(input(f'{"CNPJ":.<16}: '))
+                        cnpj_usuario =  str(input(f'{"CNPJ":.<16}: ').strip())
                     else:
                         while tipo_de_usuario not in 'FJ':
                             print(f'{colors["red"]}OPÇÃO INVÁLIDA{colors["default"]}\n')
                             tipo_de_usuario = str(input('Físico (CPF) ou Jurídico (CNPJ)? [F/J]: ').upper().strip()[0])
 
                         if tipo_de_usuario == 'F':
-                            cpf_usuario =  str(input(f'{"CPF":.<16}: '))
+                            cpf_usuario =  str(input(f'{"CPF":.<16}: ').strip())
                         elif tipo_de_usuario == 'J':
-                            cnpj_usuario =  str(input(f'{"CNPJ":.<16}: '))
+                            cnpj_usuario =  str(input(f'{"CNPJ":.<16}: ').strip())
 
                     # CRIAR NESTA LINHA E ABAIXO UM VALIDADOR DE CPF. COLOCAR VÁRIAS ALTERNATIVAS, ELE SENDO APENAS NÚMEROS, CONTENDO PONTOS, HÍFEN, ETC. Fazer o mesmo após para CNPJ.
 
-                    usuários.append([{'nome': nome_usuario}, 
+                    usuários.append([{'nome': nome_usuario},
+                                     {'telefone': telefone_usuario},
                                      {'código': código_usuario}, 
                                      {'tipo': tipo_de_usuario}, 
                                      {'cpf': cpf_usuario}, 
